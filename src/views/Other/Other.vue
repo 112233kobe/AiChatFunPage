@@ -1,9 +1,9 @@
 <template>
 	<div v-loading="loading" class="index">
-		<div  class="index_contain">
+		<div class="index_contain">
 			<div class="index_contain_left">
 				<el-input v-model="apiKey" placeholder="API KEY输入框"></el-input>
-				<el-tabs  v-model="activeName" @tab-click="handleClick">
+				<el-tabs v-model="activeName" @tab-click="handleClick">
 					<el-tab-pane label="模型选择" name="first">
 						<div class="iclc_model">
 							<el-radio v-model="modelType" label="1">model1</el-radio>
@@ -30,6 +30,7 @@
 	</div>
 </template>
 <script>
+import api from '../../api';
 export default {
 	name: 'Other',
 	data() {
@@ -82,25 +83,29 @@ export default {
 				link: this.link,
 			};
 			this.loading = true;
-			this.axios
-				.post("/api/request_paper_summary", tmp_form)
-				.then((res) => {
-					const {data, ret} = res.data;
-					if (ret !== 0) throw Error;
-					this.loading = false;
+			api.requestPaperSummary(tmp_form)
+				.then(res => {
+					// this.loading = false;
 					console.log(res);
+					if (res.ret !== -1) {
+						this.result = res.data;
+					} else {
+						throw new Error(res.msg || '提交失败');
+					}
 
 					this.$message({
 						message: '提交成功',
 						type: 'success'
 					});
-					this.result = data;
 				})
-				.catch((err) => {
-					this.loading = false;
-					this.$message.error('提交失败' || err.msg );
+				.catch(err => {
+					// this.loading = false;
+					this.$message.error(err.message || err.msg || '提交失败');
 					console.log(err);
-				});
+				})
+				.finally(()=> {
+					this.loading = false;
+				})
 		},
 		//触发上传
 		upload() {
@@ -112,11 +117,8 @@ export default {
 			console.log(selectedFile);
 			const formData = new FormData();
 			formData.append("file", selectedFile);
-			this.axios
-				.post("/api/request_paper_upload", formData, { //上传的Url
-					"Content-type": "multipart/form-data",
-				})
-				.then((res) => {
+			api.requestPaperUpload(formData)
+				.then(res => {
 					console.log(res);
 					this.fileName = res.data.data;
 					this.$message({
@@ -124,10 +126,20 @@ export default {
 						type: "success",
 					});
 				})
-				.catch((err) => {
+				.catch(err => {
 					console.log(err);
 					this.$message.error("上传失败" + err);
-				});
+				})
+			// this.axios
+			// 	.post("/api/request_paper_upload", formData, { //上传的Url
+			// 		"Content-type": "multipart/form-data",
+			// 	})
+			// 	.then((res) => {
+
+			// 	})
+			// 	.catch((err) => {
+
+			// 	});
 		},
 		handleClick(tab, event) {
 			console.log(tab, event);
@@ -135,7 +147,7 @@ export default {
 	},
 	components: {},
 	mounted() {
-		var inputElement = document.getElementById("files");
+		const inputElement = document.getElementById("files");
 		inputElement.addEventListener("change", this.handleFiles, false);
 	},
 };
