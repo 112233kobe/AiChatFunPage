@@ -1,30 +1,37 @@
 <template>
 	<div v-loading="loading" class="index">
-		<div class="index_contain">
-			<div class="index_contain_left">
-				<el-input v-model="apiKey" placeholder="API KEY输入框"></el-input>
+		<div class="index-contain">
+			<div class="index-contain-left">
+				<el-input class="index-contain-left-title" v-model="apiKey" placeholder="API KEY输入框"></el-input>
 				<el-tabs v-model="activeName" @tab-click="handleClick">
-					<el-tab-pane label="模型选择" name="first">
-						<div class="iclc_model">
+					<el-tab-pane label="模型选择" name="model">
+						<div class="index-contain-left-content">
+						<div class="iclc-card">
 							<el-radio v-model="modelType" label="1">model1</el-radio>
-							<el-radio v-model="modelType" label="2">model12</el-radio>
+							<el-radio v-model="modelType" label="2">model2</el-radio>
 						</div>
-						<div style="margin-top:10px">topk:{{ topk / 100 }}</div>
-
-						<el-slider v-model="topk"></el-slider>
-						<div style="margin-top:10px">tem:{{ tem / 100 }}</div>
-						<el-slider v-model="tem"></el-slider>
+						<div class="iclc-card">
+							<p>topk:{{ topk / 100 }}</p>
+							<el-slider v-model="topk"></el-slider>
+							<p>tem:{{ tem / 100 }}</p>
+							<el-slider v-model="tem"></el-slider>
+						</div>
+						</div>
 					</el-tab-pane>
-					<el-tab-pane label="prompt" name="second">
-						<el-input type="textarea" :rows="7" placeholder="请输入内容" v-model="textarea">
-						</el-input>
+					<el-tab-pane label="prompt" name="prompt">
+						<div class="index-contain-left-content">
+							<el-input type="textarea" :rows="11" placeholder="请输入内容" v-model="textarea">
+							</el-input>
+						</div>
 					</el-tab-pane>
 				</el-tabs>
-				<el-input class="iclc_file_input" v-model="link" placeholder="论文链接输入框"></el-input>
-				<el-button @click="upload">文件上传</el-button>
+				<div class="iclc-card">
+					<el-button @click="upload">文件上传</el-button>
+					<el-input class="iclc-file-input" v-model="link" placeholder="论文链接输入框"></el-input>
+				</div>
 				<el-button type="primary" @click="submit">提交</el-button>
 			</div>
-			<div class="index_contain_right">{{ result }}</div>
+			<div class="index-contain-right">{{ result }}</div>
 		</div>
 		<input v-show="false" id="files" type="file" />
 	</div>
@@ -54,7 +61,7 @@ export default {
 			// 文本输入框
 			textarea: '',
 			// tab
-			activeName: 'first',
+			activeName: 'model',
 			// 加载
 			loading: false,
 		};
@@ -85,7 +92,6 @@ export default {
 			this.loading = true;
 			api.requestPaperSummary(tmp_form)
 				.then(res => {
-					// this.loading = false;
 					console.log(res);
 					if (res.ret !== -1) {
 						this.result = res.data;
@@ -99,11 +105,10 @@ export default {
 					});
 				})
 				.catch(err => {
-					// this.loading = false;
-					this.$message.error(err.message || err.msg || '提交失败');
 					console.log(err);
+					this.$message.error(err.message || err.msg || '提交失败');
 				})
-				.finally(()=> {
+				.finally(() => {
 					this.loading = false;
 				})
 		},
@@ -117,6 +122,7 @@ export default {
 			console.log(selectedFile);
 			const formData = new FormData();
 			formData.append("file", selectedFile);
+			this.loading = true;
 			api.requestPaperUpload(formData)
 				.then(res => {
 					console.log(res);
@@ -130,16 +136,9 @@ export default {
 					console.log(err);
 					this.$message.error("上传失败" + err);
 				})
-			// this.axios
-			// 	.post("/api/request_paper_upload", formData, { //上传的Url
-			// 		"Content-type": "multipart/form-data",
-			// 	})
-			// 	.then((res) => {
-
-			// 	})
-			// 	.catch((err) => {
-
-			// 	});
+				.finally(() => {
+					this.loading = false;
+				})
 		},
 		handleClick(tab, event) {
 			console.log(tab, event);
