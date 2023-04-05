@@ -1,4 +1,4 @@
-# gpt
+# AiChatFun
 
 ## Project setup
 ```

@@ -31,7 +31,9 @@
 				</div>
 				<el-button type="primary" @click="submit">提交</el-button>
 			</div>
-			<div class="index-contain-right">{{ result }}</div>
+			<div class="index-contain-right">
+				<p v-html="result"></p>
+			</div>
 		</div>
 		<input v-show="false" id="files" type="file" />
 	</div>
